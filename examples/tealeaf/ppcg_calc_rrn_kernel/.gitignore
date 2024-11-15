@@ -1,0 +1,6 @@
+c_cpu_ppcg_calc_rrn_kernel
+f_cpu_ppcg_calc_rrn_kernel
+libomp.so
+
+cpu_partial_sums_ppcg_calc_rrn_kernel
+cpu_single_dataflow_ppcg_calc_rrn_kernel

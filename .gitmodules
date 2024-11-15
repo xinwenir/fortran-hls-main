@@ -1,0 +1,6 @@
+[submodule "llvm-project"]
+	path = llvm-project
+	url = git@github.com:llvm/llvm-project.git
+[submodule "HLS"]
+	path = HLS
+	url = git@github.com:Xilinx/HLS.git

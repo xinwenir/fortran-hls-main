@@ -1,0 +1,16 @@
+c_baseline_cg_c_w_kernel_norxy
+c_shift_register_calc_w_kernel_norxy
+f_baseline_cg_c_w_kernel_norxy
+f_shift_register_calc_w_kernel_norxy
+libomp.so
+test_shiftlong
+
+cpu_shfit_register_calc_w_kernel_norxy
+f_2d_cpu_shift_register_calc_w_kernel_norxy
+f_cpu_shift_register_calc_w_kernel_norxy
+
+proj_fpga_calc_w_kernel_norxy
+proj_shift_regiseter_calc_w_kernel_norxy
+
+*.out
+*.output
