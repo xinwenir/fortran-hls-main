@@ -1,5 +1,4 @@
 #!/bin/bash
-./makeclean.sh
 python3 -m venv venv
 source venv/bin/activate
 python3 -m pip install -e .
@@ -14,8 +13,8 @@ make
 
 cd ../build-v7
 
-#export PATH=/usr/include/c++/9:$PATH
-#export LD_LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/9:$LD_LIBRARY_PATH
+export PATH=/usr/lib/gcc/x86_64-linux-gnu/10/bin:$PATH
+export LD_LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/10/lib:$LD_LIBRARY_PATH
 
 export LLVM_HOME=$FXX_XILINX_LLVM_PATH/..
 export CC=$LLVM_HOME/bin/clang
