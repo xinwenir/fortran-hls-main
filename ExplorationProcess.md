@@ -80,13 +80,17 @@ The following environment variables have to be defined before using `f++`:
 * `FXX_FLANG_PATH`: path to the Flang binary directory.
 
 Using the "set_path.sh" and adding:
-
-    # `FXX_LLVM_PATH`: path to the LLVM directory of Flang.
-    export FXX_LLVM_PATH="/home/zxw/fxx/flang/install/include"
-    # `FXX_XILINX_LLVM_PATH`: path to the Xilinx LLVM directory.
-    export FXX_XILINX_LLVM_PATH="/home/zxw/tools/Xilinx/Vitis/2021.2/llvm-clang/lnx64/llvm/include"
-    # `FXX_FLANG_PATH`: path to the Flang binary directory.
-    export FXX_FLANG_PATH="/home/zxw/fxx/flang/install/bin"
+```
+#fortran-hls env
+# `FXX_LLVM_PATH`: path to the LLVM directory of Flang.
+export FXX_LLVM_PATH="/home/zxw/fxx/flang/install/bin"
+# `FXX_XILINX_LLVM_PATH`: path to the Xilinx LLVM directory.
+export FXX_XILINX_LLVM_PATH="/home/zxw/tools/Xilinx/Vitis/2021.2/llvm-clang/lnx64/llvm/bin"
+# `FXX_FLANG_PATH`: path to the Flang binary directory.
+export FXX_FLANG_PATH="/home/zxw/fxx/flang/install/bin"
+#V++
+export PATH=/home/zxw/tools/Xilinx/Vitis/2021.2/bin:$PATH
+```
 
 sudo update-alternatives --remove gcc /usr/lib/gcc/x86_64-linux-gnu/9
 sudo update-alternatives --remove gcc /usr/lib/gcc/x86_64-linux-gnu/10
