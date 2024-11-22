@@ -17,7 +17,7 @@ add_definitions(${LLVM_DEFINITIONS})
 include_directories(${LLVM_INCLUDE_DIRS})
 MESSAGE(STATUS "llvm lib = ${LLVM_LIBRARY_DIRS}.")
 link_directories(${LLVM_LIBRARY_DIRS})
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 
 if(V16)
     add_subdirectory(vxxdowngrader)  

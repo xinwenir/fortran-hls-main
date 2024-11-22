@@ -103,3 +103,16 @@ sudo update-alternatives --remove g++ /usr/include/c++/11
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/include/c++/9 25
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/include/c++/10 20
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/include/c++/11 15
+
+
+## Running:
+
+activate venv:
+```
+ source venv/bin/activate
+ fxx tests/unrll_test.f90 test1 0 unrll_top hw 1 oracle
+```
+close venv:
+```
+deactivate
+```
