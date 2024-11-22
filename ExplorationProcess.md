@@ -109,6 +109,19 @@ sudo update-alternatives --install /usr/bin/g++ g++ /usr/include/c++/9 25
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/include/c++/10 20
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/include/c++/11 15
 ```
+
+## Install the flang-llvm:
+
+
+
+## Install Vitis
+The important step to avoid the error of `Install hangs at "Generating installed device list"`:
+```
+sudo apt-get install libtinfo5
+cd Xilinx/install/packets/path
+./xsetup
+```
+
 ## Built `fortran_hls`
 ```
 ./set_virtualenv.sh
