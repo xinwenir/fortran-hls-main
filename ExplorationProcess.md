@@ -91,7 +91,8 @@ export FXX_FLANG_PATH="/home/zxw/fxx/flang/install/bin"
 #V++
 export PATH=/home/zxw/tools/Xilinx/Vitis/2021.2/bin:$PATH
 ```
-
+## switch different GCC/G++
+```
 sudo update-alternatives --remove gcc /usr/lib/gcc/x86_64-linux-gnu/9
 sudo update-alternatives --remove gcc /usr/lib/gcc/x86_64-linux-gnu/10
 sudo update-alternatives --remove gcc /usr/lib/gcc/x86_64-linux-gnu/11
@@ -107,7 +108,11 @@ sudo update-alternatives --remove g++ /usr/include/c++/11
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/include/c++/9 25
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/include/c++/10 20
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/include/c++/11 15
-
+```
+## Built `fortran_hls`
+```
+./set_virtualenv.sh
+```
 
 ## Running:
 
