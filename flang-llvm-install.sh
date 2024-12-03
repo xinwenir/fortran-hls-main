@@ -9,7 +9,7 @@ then
         cd /home/zxw/fxx
         git clone https://github.com/llvm/llvm-project.git
 
-        cd llvm-project
+        cd llvm-project-V16
         echo "Create the Build-Path and Install-Path:"
         rm -rf build
         mkdir build
@@ -18,14 +18,14 @@ then
     elif [ $1 = "crb" ]
     then
         echo "Clean & Rebuild:"
-        cd /home/zxw/fxx/llvm-project
+        cd /home/zxw/fxx/llvm-project-V16
         rm -rf build
         mkdir build
         rm -rf install
         mkdir install
     else #rb
         echo "Rebuild:"
-        cd /home/zxw/fxx/llvm-project
+        cd /home/zxw/fxx/llvm-project-V16
     fi
 else 
     echo "Install the essential package:"
@@ -36,7 +36,7 @@ else
     cd /home/zxw/fxx
     git clone https://github.com/llvm/llvm-project.git
 
-    cd llvm-project
+    cd llvm-project-V16
     echo "Create the Build-Path and Install-Path:"
     rm -rf build
     mkdir build
@@ -60,7 +60,7 @@ cmake \
   -DLLVM_ENABLE_ASSERTIONS=ON \
   -DLLVM_TARGETS_TO_BUILD=host \
   -DLLVM_LIT_ARGS=-v \
-  -DLLVM_ENABLE_PROJECTS="clang;mlir;flang" \
+  -DLLVM_ENABLE_PROJECTS="clang;mlir;flang;openmp" \
   -DLLVM_ENABLE_RUNTIMES="compiler-rt" \
   ../llvm
 

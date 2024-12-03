@@ -83,11 +83,11 @@ Using the "set_path.sh" and adding:
 ```
 #fortran-hls env
 # `FXX_LLVM_PATH`: path to the LLVM directory of Flang.
-export FXX_LLVM_PATH="/home/zxw/fxx/flang/install/bin"
+export FXX_LLVM_PATH="/home/zxw/fxx/llvm-project/build/bin/"
 # `FXX_XILINX_LLVM_PATH`: path to the Xilinx LLVM directory.
 export FXX_XILINX_LLVM_PATH="/home/zxw/tools/Xilinx/Vitis/2021.2/llvm-clang/lnx64/llvm/bin"
 # `FXX_FLANG_PATH`: path to the Flang binary directory.
-export FXX_FLANG_PATH="/home/zxw/fxx/flang/install/bin"
+export FXX_FLANG_PATH="/home/zxw/fxx/llvm-project/build/bin/"
 #V++
 export PATH=/home/zxw/tools/Xilinx/Vitis/2021.2/bin:$PATH
 ```
@@ -121,7 +121,13 @@ sudo apt-get install libtinfo5
 cd Xilinx/install/packets/path
 ./xsetup
 ```
-
+## Install `python3`
+```
+sudo apt install python3
+sudo ln -s /usr/bin/python3 /usr/bin/python
+sudo ln -s /usr/bin/python3-config /usr/bin/python-config
+sudo apt install python3.10-venv
+```
 ## Built `fortran_hls`
 ```
 ./set_virtualenv.sh
@@ -131,10 +137,76 @@ cd Xilinx/install/packets/path
 
 activate venv:
 ```
- source venv/bin/activate
- fxx tests/unrll_test.f90 test1 0 unrll_top hw 1 oracle
+source venv/bin/activate
+fxx tests/pipe_test.f90 test1 1 pipe_top hw 1 0
 ```
+
 close venv:
 ```
 deactivate
 ```
+
+## flang-new£º
+OVERVIEW: flang LLVM compiler
+
+USAGE: flang-new [options] file...
+
+OPTIONS:
+  -###                    Print (but do not run) the commands to run for this compilation
+  -cpp                    Enable predefined and command line preprocessor macros
+  -c                      Only run preprocess, compile, and assemble steps
+  -D <macro>=<value>      Define <macro> to <value> (or 1 if <value> omitted)
+  -emit-llvm              Use the LLVM representation for assembler and object files
+  -E                      Only run the preprocessor
+  -falternative-parameter-statement
+                          Enable the old style PARAMETER statement
+  -fapprox-func           Allow certain math function calls to be replaced with an approximately equivalent calculation
+  -fbackslash             Specify that backslash in string introduces an escape character
+  -fcolor-diagnostics     Enable colors in diagnostics
+  -fconvert=<value>       Set endian conversion of data for unformatted files
+  -fdefault-double-8      Set the default double precision kind to an 8 byte wide type
+  -fdefault-integer-8     Set the default integer kind to an 8 byte wide type
+  -fdefault-real-8        Set the default real kind to an 8 byte wide type
+  -ffast-math             Allow aggressive, lossy floating-point optimizations
+  -ffixed-form            Process source files in fixed form
+  -ffixed-line-length=<value>
+                          Use <value> as character line width in fixed mode
+  -ffp-contract=<value>   Form fused FP ops (e.g. FMAs)
+  -ffree-form             Process source files in free form
+  -fimplicit-none         No implicit typing allowed unless overridden by IMPLICIT statements
+  -finput-charset=<value> Specify the default character set for source files
+  -fintrinsic-modules-path <dir>
+                          Specify where to find the compiled intrinsic modules
+  -flarge-sizes           Use INTEGER(KIND=8) for the result type in size-related intrinsics
+  -flogical-abbreviations Enable logical abbreviations
+  -fno-automatic          Implies the SAVE attribute for non-automatic local objects in subprograms unless RECURSIVE
+  -fno-color-diagnostics  Disable colors in diagnostics
+  -fno-integrated-as      Disable the integrated assembler
+  -fno-signed-zeros       Allow optimizations that ignore the sign of floating point zeros
+  -fopenacc               Enable OpenACC
+  -fopenmp                Parse OpenMP pragmas and generate parallel code.
+  -fpass-plugin=<dsopath> Load pass plugin from a dynamic shared object file (only with new pass manager).
+  -freciprocal-math       Allow division operations to be reassociated
+  -fsyntax-only           Run the preprocessor, parser and semantic analysis stages
+  -fxor-operator          Enable .XOR. as a synonym of .NEQV.
+  -help                   Display available options
+  -I <dir>                Add directory to the end of the list of include search paths
+  -mllvm <value>          Additional arguments to forward to LLVM's option processing
+  -mmlir <value>          Additional arguments to forward to MLIR's option processing
+  -module-dir <dir>       Put MODULE files in <dir>
+  -nocpp                  Disable predefined and command line preprocessor macros
+  -o <file>               Write output to <file>
+  -pedantic               Warn on language extensions
+  -print-effective-triple Print the effective target triple
+  -print-target-triple    Print the normalized target triple
+  -P                      Disable linemarker output in -E mode
+  -save-temps=<value>     Save intermediate compilation results.
+  -save-temps             Save intermediate compilation results
+  -std=<value>            Language standard to compile for
+  -S                      Only run preprocess and compilation steps
+  --target=<value>        Generate code for the given target
+  -U <macro>              Undefine macro <macro>
+  --version               Print version information
+  -W<warning>             Enable the specified warning
+  -Xflang <arg>           Pass <arg> to the flang compiler
+  -x <language>           Treat subsequent input files as having type <language>

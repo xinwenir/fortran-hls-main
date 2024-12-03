@@ -1,0 +1,3 @@
+[console_scripts]
+fxx = fortran_hls.command_line:main
+

@@ -423,7 +423,7 @@ class FXX():
         code += tail
 
         return code
-
+        print("zaizai_set_metadata")
         f_iface = open("tmp/iface.ll", "w")
         f_iface.write(code)
         f_iface.close()
@@ -441,7 +441,7 @@ class FXX():
         else:
             vitis_opt_level = ""
 
-
+        print("launch_vitis")
         if compile_stage == "0":
             print("OUTPUT FILE: ", output_file)
             shutil.copy("tmp/iface.ll", f"{output_file}.ll")
@@ -581,14 +581,14 @@ class FXX():
                     included_dirs = f"-I {' '.join(self.included_directories)}"
                 else:
                     included_dirs = ""
-
-                subprocess.call(f'{self.flang_bin} -E -o tmp/preprocessor.tmp tmp/pragma_code.f90 {included_dirs}', shell=True)
+                try:
+                    subprocess.call(f'{self.flang_bin} -E -o tmp/preprocessor.tmp tmp/pragma_code.f90 {included_dirs}', shell=True)
+                except Exception as e:
+                    print(f"Error: An error occurs during the compilation of **{self.flang_bin}**-com1:{e}")
 
                 #fix_stream_names()
 
                 decl_stream_types_dict = fp.get_stream_types()
-
-
 
                 f = open("tmp/preprocessor.tmp")
                 code = f.read()
@@ -612,17 +612,21 @@ class FXX():
                 out_f.write(code)
                 out_f.close()
                 f.close()
+                subprocess.call(f'{self.flang_bin} --version', shell=True)
+                # subprocess.call(f'{self.flang_bin} -mmlir "--opaque-pointers=1" -c -emit-llvm tmp/_pragmacalls.f90 \
+                #                 -I ../../dataflow -I tests/ \
+                #                 -o tmp/_pragmacalls.bc', shell=True)
 
-
-                subprocess.call(f'{self.flang_bin} -mmlir "--opaque-pointers=false" -c -emit-llvm tmp/_pragmacalls.f90 -I ../../dataflow -I tests/ -o tmp/_pragmacalls.bc', shell=True)
+                subprocess.call(f'{self.flang_bin} --help', shell=True)
                 subprocess.call(f'{self.flang_path}/llvm-dis tmp/_pragmacalls.bc', shell=True)
 
-
+                
             llvmp = LLVMIRProcessor(self.llvm_path, self.xilinx_llvm_path, self.llvm_passes_path)
 
             
             if filetype == 'll':
                 subprocess.call(f'{self.flang_path}/llvm-as {self.filename} -o tmp/_pragmacalls.bc', shell=True)
+                
                 kernels = self.arg_kernel_names
                 is_dataflow = False
 
@@ -635,27 +639,33 @@ class FXX():
             llvmp.downgrade()
 
             llvmp.qualify_kernels(kernels, "tmp/downgraded_pragmacalls.ll", "tmp/downgraded_pragmacalls_qualified.ll")
-
+            #zxw-added
+            #llvmp.process_ir_file("tmp/downgraded_pragmacalls_qualified_q.ll", "tmp/downgraded_pragmacalls_qualified.ll")
+            
             f_downgraded = open("tmp/downgraded_pragmacalls_qualified.ll")
             downgraded_ir = f_downgraded.read()
             f_downgraded.close()
 
-
-
-
-
             if not self.xilinx_generated:
-                downgraded_ir = re.sub("declare", f'declare i32 @_start_df_call()\ndeclare void @_end_df_call()\ndeclare', downgraded_ir, count=1)
+                downgraded_ir = re.sub("declare", \
+                                       f'declare i32 @_start_df_call()\ndeclare void @_end_df_call()\ndeclare', \
+                                        downgraded_ir,count=1)
 
             f_downgraded = open("tmp/downgraded_pragmacalls_qualified.ll", "w")
             f_downgraded.write(downgraded_ir)
             f_downgraded.close()
 
+            subprocess.call(f"{self.xilinx_llvm_path}/opt  \
+                            -load {self.xilinx_passes_path}/set_pragma_metadata/libSetPragmaMetadata.so \
+                            --set_pragma_metadata --strip-dead-prototypes \
+                            tmp/downgraded_pragmacalls_qualified.ll \
+                            -o tmp/dataflow.bc", shell=True)
 
-            subprocess.call(f"{self.xilinx_llvm_path}/opt  -load {self.xilinx_passes_path}/set_pragma_metadata/libSetPragmaMetadata.so --set_pragma_metadata --strip-dead-prototypes tmp/downgraded_pragmacalls_qualified.ll -o tmp/dataflow.bc", shell=True)
-            subprocess.call(f"{self.xilinx_llvm_path}/llvm-dis tmp/dataflow.bc -o tmp/dataflow.ll", shell=True)
-
-
+            subprocess.call(f"{self.xilinx_llvm_path}/llvm-dis \
+                            tmp/dataflow.bc \
+                            -o tmp/dataflow.ll", shell=True)
+                
+            
             # TODO: remove. This is just for debuggind purposes
             f = open("tmp/dataflow.ll")
             f_post = open("tmp/post_pass.ll", "w")
@@ -713,7 +723,7 @@ class FXX():
             if self.oracle == "1":
                 self.generate_oracle(self.filename, code)
 
-
+            print("zaizaiwoaini")
 
         self.launch_vitis(self.output_file, self.kernel_name, self.mode, self.compile_stage, self.opt_level, self.platform)
 

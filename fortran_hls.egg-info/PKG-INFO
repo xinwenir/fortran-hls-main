@@ -1,0 +1,13 @@
+Metadata-Version: 2.1
+Name: fortran-hls
+Version: 0.1
+Summary: LLVM and regex based tool that enables Fortran on AMD Xilinx FPGAs.
+Home-page: UNKNOWN
+Author: Gabriel Rodriguez-Canal
+Author-email: gabriel.rodcanal@ed.ac.uk
+License: Apache 2.0
+Platform: UNKNOWN
+License-File: LICENSE
+
+UNKNOWN
+

@@ -26,9 +26,9 @@ class LLVMIRProcessor:
         :param llvm_passes_path: path of the LLVM passes for F18
         :type llvm_passes_path: str
         """
-        self.llvm_dis = llvm_path + 'llvm-dis'
-        self.llvm_as = llvm_path + 'llvm-as'
-        self.opt = llvm_path + 'opt'
+        self.llvm_dis = llvm_path + '/llvm-dis'
+        self.llvm_as = llvm_path + '/llvm-as'
+        self.opt = llvm_path + '/opt'
         self.xilinx_opt = xilinx_llvm_path + 'opt'
         self.in_filename = None
         self.out_filename = None
@@ -192,6 +192,50 @@ class LLVMIRProcessor:
 
             f_in.close() 
             f_out.close()
+
+    # Convert the declarations of incompatible malloc and free to the LLVM-V7 compatible format.
+    def convert_llvm_declaration(self, input_ir):
+        """
+        This method is used to convert the declarations of incompatible malloc and free in the input IR (Intermediate Representation) to the format that is compatible with LLVM-V7.
+
+        Args:
+            input_ir (str): The input Intermediate Representation string which may contain incompatible declarations.
+
+        Returns:
+            str: The modified Intermediate Representation string with converted declarations.
+        """
+        # Replace the incompatible malloc declaration
+        # Replace the declaration of 'declare ptr @_Z7malloc(i64)' with 'declare i8* @malloc(i64)'
+        modified_ir = re.sub(r"declare\s+ptr\s+@_Z7malloc\(i64\)", "declare i8* @malloc(i64)", input_ir)
+
+        # Modify the free declaration
+        # Replace the declaration of 'declare void @_Z7free(ptr)' with 'declare void @free(i8*)'
+        modified_ir = re.sub(r'declare\s+void\s+@_Z7free\(ptr\)', "declare void @free(i8*)", modified_ir)
+
+        # Modify the 'ptr' type in the 'define' statements
+        # Replace the pattern 'define void @\\w+(ptr %(\w+))' with 'define void @\\w+(i8* %\1)'
+        modified_ir = re.sub(r'define\s+void\s+@([a-zA-Z_][a-zA-Z0-9_]*)\(ptr\s+%([a-zA-Z_][a-zA-Z0-9_]*)\)', r'define void @\1(i8* %\2)', modified_ir)
+        # Modify all the places where the 'ptr' type is used and unify it to the 'i8*' type
+        modified_ir = re.sub(r'\bptr\b', 'i32*', modified_ir)
+        return modified_ir
+
+    # Read the IR file and process it
+    def process_ir_file(self, input_filename, output_filename):
+        """
+        This method reads an IR (Intermediate Representation) file specified by the input_filename,
+        processes it by converting the incompatible declarations using the convert_llvm_declaration method,
+        and then writes the processed output to the file specified by the output_filename.
+
+        Args:
+            input_filename (str): The name of the input IR file to be read.
+            output_filename (str): The name of the output file where the processed IR will be written.
+        """
+        with open(input_filename, 'r') as infile:
+            input_ir = infile.read()
+        # Convert the malloc declaration
+        output_ir = self.convert_llvm_declaration(input_ir)
+        with open(output_filename, 'w') as outfile:
+            outfile.write(output_ir)
 
 
     def clean_ir(self, in_filename=None, out_filename=None):
