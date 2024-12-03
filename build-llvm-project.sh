@@ -9,6 +9,8 @@ cd classic-flang-llvm-project
 mkdir -p build && cd build
 cmake $CMAKE_OPTIONS -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ \
 -DCMAKE_BUILD_TYPE=Release \
--DLLVM_ENABLE_CLASSIC_FLANG=ON -DLLVM_ENABLE_PROJECTS="clang;openmp" ../llvm
+-DLLVM_ENABLE_CLASSIC_FLANG=ON \
+-DCLANG_ENABLE_OPAQUE_POINTERS=OFF\
+-DLLVM_ENABLE_PROJECTS="clang;openmp" ../llvm
 make
 sudo make install
