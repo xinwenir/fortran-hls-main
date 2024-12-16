@@ -51,8 +51,6 @@ class FXX():
 
         return subroutine_names
 
-
-
     # IR
     def replace_llvm_calls(self, ir_code, xilinx_generated=False):
         stream_ssa_dict = {}
@@ -190,7 +188,6 @@ class FXX():
                 point2 = ""
 
             push_declarations.append(f'declare void @llvm.fpga.fifo.push.{pop_type}({argtype1}{point1}, {argtype2}{point2} nocapture) #2')
-
 
         if not xilinx_generated:
             depth_declarations.append(f'call void (...) @llvm.fpga.set.stream.depth(...) #1')
@@ -612,20 +609,28 @@ class FXX():
                 out_f.write(code)
                 out_f.close()
                 f.close()
+
                 subprocess.call(f'{self.flang_bin} --version', shell=True)
+                # subprocess.call(f'{self.flang_bin} --help', shell=True)
                 # subprocess.call(f'{self.flang_bin} -mmlir "--opaque-pointers=1" -c -emit-llvm tmp/_pragmacalls.f90 \
                 #                 -I ../../dataflow -I tests/ \
                 #                 -o tmp/_pragmacalls.bc', shell=True)
+                # subprocess.call(f'{self.flang_bin} -mllvm "--opaque-pointers=0" -c -emit-llvm tmp/_pragmacalls.f90 \
+                #                 -I ../../dataflow -I tests/ \
+                #                 -o tmp/_pragmacalls.bc', shell=True)
+                subprocess.call(f'{self.flang_bin} -mmlir -opaque-pointers=0 -c -emit-llvm tmp/_pragmacalls.f90 \
+                                 -I ../../dataflow -I tests/ \
+                                -o tmp/_pragmacalls.bc', shell=True)
+                
 
-                subprocess.call(f'{self.flang_bin} --help', shell=True)
-                subprocess.call(f'{self.flang_path}/llvm-dis tmp/_pragmacalls.bc', shell=True)
+                subprocess.call(f'{self.flang_path}/llvm-dis -opaque-pointers=0 tmp/_pragmacalls.bc', shell=True)
 
                 
             llvmp = LLVMIRProcessor(self.llvm_path, self.xilinx_llvm_path, self.llvm_passes_path)
 
             
             if filetype == 'll':
-                subprocess.call(f'{self.flang_path}/llvm-as {self.filename} -o tmp/_pragmacalls.bc', shell=True)
+                subprocess.call(f'{self.flang_path}/llvm-as {self.filename} -opaque-pointers=0 -o tmp/_pragmacalls.bc', shell=True)
                 
                 kernels = self.arg_kernel_names
                 is_dataflow = False
@@ -655,6 +660,7 @@ class FXX():
             f_downgraded.write(downgraded_ir)
             f_downgraded.close()
 
+            ###????????????????
             subprocess.call(f"{self.xilinx_llvm_path}/opt  \
                             -load {self.xilinx_passes_path}/set_pragma_metadata/libSetPragmaMetadata.so \
                             --set_pragma_metadata --strip-dead-prototypes \

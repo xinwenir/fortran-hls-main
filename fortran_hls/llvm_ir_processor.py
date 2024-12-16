@@ -29,7 +29,7 @@ class LLVMIRProcessor:
         self.llvm_dis = llvm_path + '/llvm-dis'
         self.llvm_as = llvm_path + '/llvm-as'
         self.opt = llvm_path + '/opt'
-        self.xilinx_opt = xilinx_llvm_path + 'opt'
+        self.xilinx_opt = xilinx_llvm_path + '/opt'
         self.in_filename = None
         self.out_filename = None
         self.llvm_passes_path = llvm_passes_path
@@ -73,7 +73,7 @@ class LLVMIRProcessor:
         if self.none_files(in_filename, out_filename):
             raise NoneFilename
         else:
-            subprocess.call(f'{self.llvm_dis} {in_filename} -o {out_filename}', shell=True)
+            subprocess.call(f'{self.llvm_dis} {in_filename} -opaque-pointers=0 -o {out_filename}', shell=True)
 
     def assemble(self, in_filename=None, out_filename=None):
         """
@@ -87,7 +87,7 @@ class LLVMIRProcessor:
         if self.none_files(in_filename, out_filename):
             raise NoneFilename
         else:
-            subprocess.call(f'{self.llvm_as} {in_filename} -o {out_filename}', shell=True)
+            subprocess.call(f'{self.llvm_as} {in_filename} -opaque-pointers=0 -o {out_filename}', shell=True)
 
     def strip_debug(self, in_filename=None, out_filename=None):
         """
@@ -101,7 +101,8 @@ class LLVMIRProcessor:
         if self.none_files(in_filename, out_filename):
             raise NoneFilename
         else:
-            subprocess.call(f'{self.opt} -strip-debug {in_filename} -o {out_filename}', shell=True)
+            subprocess.call(f'{self.opt} -opaque-pointers=0 -strip-debug {in_filename} -o {out_filename}', shell=True)
+            print("llvm-opt: strip_debug")
 
     def _downgrade(self, in_filename=None, out_filename=None):
         """
@@ -117,7 +118,8 @@ class LLVMIRProcessor:
         if self.none_files(in_filename, out_filename):
             raise NoneFilename
         else:
-            subprocess.call(f'{self.opt} -load {self.libdowngrader} --downgrader -enable-new-pm=0 {in_filename} -o {out_filename}', shell=True)
+            subprocess.call(f'{self.opt} -opaque-pointers=0 -load {self.libdowngrader} --downgrader -enable-new-pm=0 {in_filename} -o {out_filename}', shell=True)
+            print("llvm-opt: _downgrade")
 
     def none_files(self, in_filename, out_filename):
         return (in_filename is None or out_filename is None) and (self.in_filename is None or self.out_filename is None)
@@ -349,7 +351,12 @@ class LLVMIRProcessor:
             arch_swap_ir = re.sub('target triple = "fpga32-xilinx-none"', 'target triple = "x86_64-unknown-linux-gnu"', input_ir)
             f_temp.write(arch_swap_ir)
             f_temp.close()
-            subprocess.call(f'{self.opt} -load {self.libextractfunctions} --extract_functions -enable-new-pm=0 tmp/_arch_temp.ll', shell=True)
+            subprocess.call(f'{self.opt} -load {self.libextractfunctions} \
+                             --extract_functions \
+                             -enable-new-pm=0 \
+                            -opaque-pointers=0 \
+                            tmp/_arch_temp.ll', shell=True)
+            print("llvm-opt: extract_functions")
             f_in.close()
 
             # Prepare separate function files for compilation
