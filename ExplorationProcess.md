@@ -138,7 +138,7 @@ sudo apt install python3.10-venv
 activate venv:
 ```
 source venv/bin/activate
-fxx tests/pipe_test.f90 test1 1 pipe_top hw 1 0
+fxx tests/pipe_test.f90 test1 1 pipe_test hw 1 0 -platform /home/zxw/project/xilinx_project/kv260_custom_platform/system_wrapper.xsa
 ```
 
 close venv:
