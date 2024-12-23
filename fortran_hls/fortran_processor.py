@@ -354,11 +354,8 @@ class FortranProcessor:
 
         return code_preproc
 
-
-
-
     # Fortran
-    def lower_polymorphic(self, decl_stream_types_dict, code_preproc):
+    def lower_polymorphic(self, filetype, decl_stream_types_dict, code_preproc):
         # TODO: genralise this. Just done this to get the experimentation
         code_preproc = re.sub("packed_data, value", "type(packed_data), value", code_preproc)
         #f_preproc = open('fixed_preprocessor.tmp')
@@ -450,8 +447,10 @@ class FortranProcessor:
         code_preproc = re.sub("real\s*function", "real(kind=8) function", code_preproc)
 
 
-
-        f_poly = open("tmp/poly.f90", "w")
+        if filetype == "f90":
+            f_poly = open("tmp/poly.f90", "w")
+        else:
+            f_poly = open("tmp/poly.f", "w")
         f_poly.write(code_preproc)
         f_poly.close()
 

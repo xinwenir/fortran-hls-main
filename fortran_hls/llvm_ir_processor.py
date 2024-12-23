@@ -118,7 +118,7 @@ class LLVMIRProcessor:
         if self.none_files(in_filename, out_filename):
             raise NoneFilename
         else:
-            subprocess.call(f'{self.opt} -opaque-pointers=0 -load {self.libdowngrader} --downgrader -enable-new-pm=0 {in_filename} -o {out_filename}', shell=True)
+            subprocess.call(f'{self.opt} -opaque-pointers=0 --load={self.libdowngrader} --downgrader -enable-new-pm=0 {in_filename} -o {out_filename}', shell=True)
             print("llvm-opt: _downgrade")
 
     def none_files(self, in_filename, out_filename):
@@ -206,20 +206,28 @@ class LLVMIRProcessor:
         Returns:
             str: The modified Intermediate Representation string with converted declarations.
         """
-        # Replace the incompatible malloc declaration
-        # Replace the declaration of 'declare ptr @_Z7malloc(i64)' with 'declare i8* @malloc(i64)'
-        modified_ir = re.sub(r"declare\s+ptr\s+@_Z7malloc\(i64\)", "declare i8* @malloc(i64)", input_ir)
+        llvm_ir_cleaned = re.sub(r', i64 1', '', input_ir)
+        llvm_ir_cleaned = re.sub(r'\scontract\s', ' ', llvm_ir_cleaned)
+        llvm_ir_cleaned = re.sub(r'getelementptr inbounds \(([^)]+)\)(\w+)\)', 
+                                 r'getelementptr inbounds (\1), i64 \2)', llvm_ir_cleaned)
+        llvm_ir_cleaned = re.sub(r'attributes\s+#0\s+=\s+\{\s*\}', 'attributes #0 = { nounwind }', llvm_ir_cleaned)
+        llvm_ir_cleaned = re.sub(r'(\{[^}]*?)\b(speculatable)\b([^}]*\})', r'\1\3',llvm_ir_cleaned)
+        # llvm_ir_cleaned = re.sub( r'getelementptr inbounds \(([^)]+)\),\s+i64\s+(\w+)\)',
+        #                           r'getelementptr inbounds (\1), i32 \2)',llvm_ir_cleaned)
+        # # Replace the incompatible malloc declaration
+        # # Replace the declaration of 'declare ptr @_Z7malloc(i64)' with 'declare i8* @malloc(i64)'
+        # modified_ir = re.sub(r"declare\s+ptr\s+@_Z7malloc\(i64\)", "declare i8* @malloc(i64)", input_ir)
 
-        # Modify the free declaration
-        # Replace the declaration of 'declare void @_Z7free(ptr)' with 'declare void @free(i8*)'
-        modified_ir = re.sub(r'declare\s+void\s+@_Z7free\(ptr\)', "declare void @free(i8*)", modified_ir)
+        # # Modify the free declaration
+        # # Replace the declaration of 'declare void @_Z7free(ptr)' with 'declare void @free(i8*)'
+        # modified_ir = re.sub(r'declare\s+void\s+@_Z7free\(ptr\)', "declare void @free(i8*)", modified_ir)
 
-        # Modify the 'ptr' type in the 'define' statements
-        # Replace the pattern 'define void @\\w+(ptr %(\w+))' with 'define void @\\w+(i8* %\1)'
-        modified_ir = re.sub(r'define\s+void\s+@([a-zA-Z_][a-zA-Z0-9_]*)\(ptr\s+%([a-zA-Z_][a-zA-Z0-9_]*)\)', r'define void @\1(i8* %\2)', modified_ir)
-        # Modify all the places where the 'ptr' type is used and unify it to the 'i8*' type
-        modified_ir = re.sub(r'\bptr\b', 'i32*', modified_ir)
-        return modified_ir
+        # # Modify the 'ptr' type in the 'define' statements
+        # # Replace the pattern 'define void @\\w+(ptr %(\w+))' with 'define void @\\w+(i8* %\1)'
+        # modified_ir = re.sub(r'define\s+void\s+@([a-zA-Z_][a-zA-Z0-9_]*)\(ptr\s+%([a-zA-Z_][a-zA-Z0-9_]*)\)', r'define void @\1(i8* %\2)', modified_ir)
+        # # Modify all the places where the 'ptr' type is used and unify it to the 'i8*' type
+        # modified_ir = re.sub(r'\bptr\b', 'i32*', modified_ir)
+        return llvm_ir_cleaned
 
     # Read the IR file and process it
     def process_ir_file(self, input_filename, output_filename):
@@ -288,6 +296,15 @@ class LLVMIRProcessor:
             input_ir = re.sub("define internal (\w+) @", "define internal \g<1> @_Z7", input_ir)
             input_ir = re.sub("call (\w+) @", "call \g<1> @_Z7", input_ir)
             input_ir = re.sub("declare (\w+) @", "declare \g<1> @_Z7", input_ir)
+            
+            #added by zxw 20241223-----
+            input_ir = re.sub("call (\w+) (\w+) @", "call \g<1> \g<2> @_Z7", input_ir)
+            #input_ir = re.sub("call contract double @acos", "call contract double @_7Zacos", input_ir)
+            # input_ir = re.sub("declare double @acos", "declare double @llvm.acos.f64", input_ir)
+            # input_ir = re.sub("call contract double @acos", "call contract double @llvm.acos.f64", input_ir)
+            # input_ir = re.sub("call double @atan", "call double @llvm.atan.f64", input_ir)
+            # input_ir = re.sub("declare double @atan", "declare double @llvm.atan.f64", input_ir)
+            #--------------------
 
             input_ir = re.sub("define i32 @_Z7_start_df_call\(", "define i32 @_start_df_call(", input_ir)
             input_ir = re.sub("call i32 @_Z7_start_df_call\(", "call i32 @_start_df_call(", input_ir)
@@ -334,8 +351,7 @@ class LLVMIRProcessor:
 
     def extract_functions(self, in_filename=None):
         """
-        Split the input LLVM IR into the different functions to be used later when linking to solve dependencies. Generates one file per function with 
-        the following naming convention:
+        Split the input LLVM IR into the different functions to be used later when linking to solve dependencies. Generates one file per function with the following naming convention:
         prepared_{mangled_function_name}.ll
 
         :param in_filename: path of the input LLVM IR in human-readable format
@@ -351,12 +367,13 @@ class LLVMIRProcessor:
             arch_swap_ir = re.sub('target triple = "fpga32-xilinx-none"', 'target triple = "x86_64-unknown-linux-gnu"', input_ir)
             f_temp.write(arch_swap_ir)
             f_temp.close()
-            subprocess.call(f'{self.opt} -load {self.libextractfunctions} \
-                             --extract_functions \
-                             -enable-new-pm=0 \
+            #subprocess.call(f'{self.opt} --help', shell=True)
+            print(self.libextractfunctions)
+            subprocess.call(f'{self.opt} -load={self.libextractfunctions} --extract_functions \
+                            -enable-new-pm=0 \
                             -opaque-pointers=0 \
                             tmp/_arch_temp.ll', shell=True)
-            print("llvm-opt: extract_functions")
+            print("llvm-opt: extract_functions--zaizai-359")
             f_in.close()
 
             # Prepare separate function files for compilation

@@ -542,7 +542,7 @@ class FXX():
         filetype = os.path.basename(self.filename).split('.')[1]
 
         if self.gen_llvm_ir == "1":
-            if filetype == "f90":
+            if filetype == "f90" or filetype == "f":
                 fp = FortranProcessor(self.flang_path)
 
                 # Process HLS pragmas
@@ -567,19 +567,26 @@ class FXX():
 
                 code, is_dataflow = fp.process_hls_dataflow(code)
 
-                f = open("tmp/pragma_code.f90", "w")
+                if filetype == "f90":
+                    f = open("tmp/pragma_code.f90", "w")
+                else:
+                    f = open("tmp/pragma_code.f", "w")
                 f.write(code)
                 f.close()
 
 
                 # Get stream types by using the preprocessor
-                #subprocess.call(f'{self.flang_bin} -E -o tmp/preprocessor.tmp tmp/pragma_code.f90 -I {self.fxx_dir}/../fortran_testcases', shell=True)
+                #subprocess.call(f'{self.flang_bin} -E -o tmp/preprocessor.tmp tmp/pragma_code.f90 -I {self.fxx_dir}/../fortran_testcases', shell=True)     
                 if self.included_directories:
                     included_dirs = f"-I {' '.join(self.included_directories)}"
+                    print("include_dir = ", included_dirs)
                 else:
                     included_dirs = ""
                 try:
-                    subprocess.call(f'{self.flang_bin} -E -o tmp/preprocessor.tmp tmp/pragma_code.f90 {included_dirs}', shell=True)
+                    if filetype == "f90":
+                        subprocess.call(f'{self.flang_bin} -E -o tmp/preprocessor.tmp tmp/pragma_code.f90 {included_dirs}', shell=True)
+                    else:
+                        subprocess.call(f'{self.flang_bin} -E -o tmp/preprocessor.tmp tmp/pragma_code.f {included_dirs}', shell=True)
                 except Exception as e:
                     print(f"Error: An error occurs during the compilation of **{self.flang_bin}**-com1:{e}")
 
@@ -597,15 +604,21 @@ class FXX():
                 f.close()
                 code = fp.remove_local_depths(code)
 
-                fp.lower_polymorphic(decl_stream_types_dict, code)
+                fp.lower_polymorphic(filetype, decl_stream_types_dict, code)
 
-
-                f = open("tmp/poly.f90")
+                if filetype == "f90":
+                    f = open("tmp/poly.f90")
+                else:
+                    f = open("tmp/poly.f")
+                
                 code = f.read()
 
                 code = fp.process_hls_streams(code, decl_stream_types_dict)
-
-                out_f = open("tmp/_pragmacalls.f90", "w")
+                if filetype == "f90":
+                    out_f = open("tmp/_pragmacalls.f90", "w")
+                else:
+                    out_f = open("tmp/_pragmacalls.f", "w")
+                
                 out_f.write(code)
                 out_f.close()
                 f.close()
@@ -618,16 +631,20 @@ class FXX():
                 # subprocess.call(f'{self.flang_bin} -mllvm "--opaque-pointers=0" -c -emit-llvm tmp/_pragmacalls.f90 \
                 #                 -I ../../dataflow -I tests/ \
                 #                 -o tmp/_pragmacalls.bc', shell=True)
-                subprocess.call(f'{self.flang_bin} -mmlir -opaque-pointers=0 -c -emit-llvm tmp/_pragmacalls.f90 \
+                if filetype == "f90":
+                    subprocess.call(f'{self.flang_bin} -mmlir -opaque-pointers=0 -c -emit-llvm tmp/_pragmacalls.f90 \
+                                 -I ../../dataflow -I tests/ \
+                                -o tmp/_pragmacalls.bc', shell=True)
+                else:
+                    subprocess.call(f'{self.flang_bin} -mmlir -opaque-pointers=0 -c -emit-llvm tmp/_pragmacalls.f \
                                  -I ../../dataflow -I tests/ \
                                 -o tmp/_pragmacalls.bc', shell=True)
                 
-
-                subprocess.call(f'{self.flang_path}/llvm-dis -opaque-pointers=0 tmp/_pragmacalls.bc', shell=True)
-
+                subprocess.call(f'{self.flang_path}/llvm-dis tmp/_pragmacalls.bc', shell=True)
+            else:
+                print("Error: Input file type is only support \"xxx.f90\" or \"xxx.f\"")
                 
             llvmp = LLVMIRProcessor(self.llvm_path, self.xilinx_llvm_path, self.llvm_passes_path)
-
             
             if filetype == 'll':
                 subprocess.call(f'{self.flang_path}/llvm-as {self.filename} -opaque-pointers=0 -o tmp/_pragmacalls.bc', shell=True)
@@ -643,9 +660,9 @@ class FXX():
             llvmp.set_output_file("tmp/downgraded_pragmacalls.ll")
             llvmp.downgrade()
 
-            llvmp.qualify_kernels(kernels, "tmp/downgraded_pragmacalls.ll", "tmp/downgraded_pragmacalls_qualified.ll")
+            llvmp.qualify_kernels(kernels, "tmp/downgraded_pragmacalls.ll", "tmp/downgraded_pragmacalls_qualified_q.ll")
             #zxw-added
-            #llvmp.process_ir_file("tmp/downgraded_pragmacalls_qualified_q.ll", "tmp/downgraded_pragmacalls_qualified.ll")
+            llvmp.process_ir_file("tmp/downgraded_pragmacalls_qualified_q.ll", "tmp/downgraded_pragmacalls_qualified.ll")
             
             f_downgraded = open("tmp/downgraded_pragmacalls_qualified.ll")
             downgraded_ir = f_downgraded.read()
@@ -660,10 +677,12 @@ class FXX():
             f_downgraded.write(downgraded_ir)
             f_downgraded.close()
 
-            ###????????????????
+            subprocess.call(f"{self.xilinx_llvm_path}/opt -verify tmp/downgraded_pragmacalls_qualified.ll", shell=True)
+            #subprocess.call(f"{self.xilinx_llvm_path}/opt --help", shell=True)
             subprocess.call(f"{self.xilinx_llvm_path}/opt  \
-                            -load {self.xilinx_passes_path}/set_pragma_metadata/libSetPragmaMetadata.so \
+                            -load={self.xilinx_passes_path}/set_pragma_metadata/libSetPragmaMetadata.so \
                             --set_pragma_metadata --strip-dead-prototypes \
+                            -print-before-all \
                             tmp/downgraded_pragmacalls_qualified.ll \
                             -o tmp/dataflow.bc", shell=True)
 
