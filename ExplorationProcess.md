@@ -143,7 +143,9 @@ fxx tests/pipe_test.f90 test1 1 pipe_test hw 1 0 -platform /home/zxw/project/xil
 - Test for music 
 
 ```
+source ~/project/fortran-hls-main/venv/bin/activate
 fxx test_music.f test_music 1 test_music hw 2 0 -platform /home/zxw/project/xilinx_project/kv260_custom_platform/system_wrapper.xsa -I src/ -temp_dir tmp 
+fxx test_music.f test_music 1 test_music hw 1 0 -platform /home/zxw/project/xilinx_project/kv260_custom_platform/system_wrapper.xsa -I src/ -temp_dir tmp 
 ```
 
 - close venv:
