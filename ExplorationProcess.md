@@ -83,11 +83,11 @@ Using the "set_path.sh" and adding:
 ```
 #fortran-hls env
 # `FXX_LLVM_PATH`: path to the LLVM directory of Flang.
-export FXX_LLVM_PATH="/home/zxw/fxx/llvm-project/build/bin/"
+export FXX_LLVM_PATH="/home/zxw/fxx/llvm-project-V16/build/bin/"
 # `FXX_XILINX_LLVM_PATH`: path to the Xilinx LLVM directory.
 export FXX_XILINX_LLVM_PATH="/home/zxw/tools/Xilinx/Vitis/2021.2/llvm-clang/lnx64/llvm/bin"
 # `FXX_FLANG_PATH`: path to the Flang binary directory.
-export FXX_FLANG_PATH="/home/zxw/fxx/llvm-project/build/bin/"
+export FXX_FLANG_PATH="/home/zxw/fxx/llvm-project-V16/build/bin/"
 #V++
 export PATH=/home/zxw/tools/Xilinx/Vitis/2021.2/bin:$PATH
 ```
@@ -110,8 +110,15 @@ sudo update-alternatives --install /usr/bin/g++ g++ /usr/include/c++/10 20
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/include/c++/11 15
 ```
 
-## Install the flang-llvm:
+## Install the flang-llvm: ---------------->use this*****************************
 
+chomd +777 flang-llvm-install.sh
+./flang-llvm-install.sh
+
+Notice:
+  using your path and 
+    mkdir -p /home/zxw/fxx
+    cd /home/zxw/fxx
 
 
 ## Install Vitis

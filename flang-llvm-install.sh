@@ -32,9 +32,9 @@ else
     sudo apt-get install build-essential cmake ccache git libffi-dev libtinfo-dev ninja-build zlib1g-dev zstd
 
     echo "init the path and download the flang-llvm-project from Git:"
-    mkdir -p /home/zxw/fxx
-    cd /home/zxw/fxx
-    git clone https://github.com/llvm/llvm-project.git
+    [ -d "/home/zxw/fxx" ] || mkdir -p /home/zxw/fxx  #使用你自己的目录
+    cd /home/zxw/fxx #将llvm-project-v16解压到此目录下。*********
+    # git clone https://github.com/llvm/llvm-project.git
 
     cd llvm-project-V16
     echo "Create the Build-Path and Install-Path:"

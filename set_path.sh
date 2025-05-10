@@ -36,11 +36,11 @@ vi ~/.bashrc
 
     #fortran-hls env
 # `FXX_LLVM_PATH`: path to the LLVM directory of Flang.
-echo "export FXX_LLVM_PATH="/home/zxw/fxx/llvm-project/build/bin/"" >> ~/.bashrc
+echo "export FXX_LLVM_PATH="/home/zxw/fxx/llvm-project-V16/build/bin/"" >> ~/.bashrc
 # `FXX_XILINX_LLVM_PATH`: path to the Xilinx LLVM directory.
 echo "export FXX_XILINX_LLVM_PATH="/home/zxw/tools/Xilinx/Vitis/2021.2/llvm-clang/lnx64/llvm/bin"" >> ~/.bashrc
 # `FXX_FLANG_PATH`: path to the Flang binary directory.
-echo "export FXX_FLANG_PATH="/home/zxw/fxx/llvm-project/build/bin/"" >> ~/.bashrc
+echo "export FXX_FLANG_PATH="/home/zxw/fxx/llvm-project-V16/build/bin/"" >> ~/.bashrc
 #V++
 echo "export PATH=/home/zxw/tools/Xilinx/Vitis/2021.2/bin:$PATH" >> ~/.bashrc
 
